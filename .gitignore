@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# sorter artifacts (local machine only)
+.system/
+temp_processing/
+queue.json
+credentials.json
+
+# temp lint/tsc output
+lint.txt
+tsc.txt
