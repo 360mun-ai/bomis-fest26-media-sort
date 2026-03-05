@@ -1,6 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { registerUser, isUserApproved } from "@/app/api/users/route";
+import { registerUser, isUserApproved } from "@/lib/user-store";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -11,15 +11,15 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async signIn({ user }) {
-            // Register every user who signs in (idempotent)
+            // Register every user who signs in (idempotent, stored in Drive)
             if (user.email) {
-                registerUser(user.email, user.name || "Unknown", user.image || undefined);
+                await registerUser(user.email, user.name || "Unknown", user.image || undefined);
             }
-            return true; // Allow sign-in, but approval check happens in session callback
+            return true;
         },
         async session({ session }) {
             if (session.user?.email) {
-                const approved = isUserApproved(session.user.email);
+                const approved = await isUserApproved(session.user.email);
                 (session.user as { isApproved?: boolean }).isApproved = approved;
             }
             return session;
