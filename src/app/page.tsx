@@ -20,7 +20,7 @@ export default async function LoginPage() {
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-zinc-800">
             <Camera className="h-6 w-6 text-zinc-200" />
           </div>
-          <CardTitle className="text-2xl font-bold">Open Minds Fest Media</CardTitle>
+          <CardTitle className="text-2xl font-bold">BOMIS Fest Media</CardTitle>
           <CardDescription>Event Photography Ingestion Portal</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">

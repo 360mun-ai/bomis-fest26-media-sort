@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Open Minds Fest Media Sorter",
+  title: "BOMIS Fest Media Sorter",
   description: "Event Photography Ingestion & Sorting Portal",
 };
 

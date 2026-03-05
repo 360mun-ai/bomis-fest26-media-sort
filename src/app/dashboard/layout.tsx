@@ -54,7 +54,7 @@ export default async function DashboardLayout({
             <aside className="hidden w-64 flex-col border-r border-zinc-800 bg-zinc-950 md:flex">
                 <div className="flex h-14 items-center border-b border-zinc-800 px-6 shrink-0">
                     <Camera className="mr-2 h-5 w-5 text-zinc-300" />
-                    <span className="font-semibold text-zinc-100">OM Fest Media</span>
+                    <span className="font-semibold text-zinc-100">BOMIS Fest Media</span>
                 </div>
                 <nav className="flex-1 space-y-1 p-4">
                     <Link href="/dashboard/upload" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors">
@@ -66,10 +66,17 @@ export default async function DashboardLayout({
                         Galleries
                     </Link>
                     {isAdmin && (
-                        <Link href="/dashboard/review" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors mt-6">
-                            <ShieldCheck className="h-5 w-5" />
-                            Admin Review
-                        </Link>
+                        <>
+                            <div className="mt-6 mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Admin</div>
+                            <Link href="/dashboard/review" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors">
+                                <ShieldCheck className="h-5 w-5" />
+                                Face Management
+                            </Link>
+                            <Link href="/dashboard/users" className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-50 transition-colors">
+                                <ShieldAlert className="h-5 w-5" />
+                                User Approvals
+                            </Link>
+                        </>
                     )}
                 </nav>
                 <div className="border-t border-zinc-800 p-4">
@@ -101,7 +108,7 @@ export default async function DashboardLayout({
                 <header className="flex h-14 items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 md:hidden shrink-0">
                     <div className="flex items-center text-sm font-semibold text-zinc-100">
                         <Camera className="mr-2 h-5 w-5" />
-                        OM Fest
+                        BOMIS Fest
                     </div>
                     {/* Mobile menu could be added here, but keeping it simple as per PRD */}
                 </header>
