@@ -38,9 +38,9 @@ except Exception as e:
     drive_service = None
 
 # ---- Google Drive Folder IDs (Fill these in) ----
-UNSORTED_FOLDER_ID = ""
-GROUP_PHOTOS_FOLDER_ID = ""
-STUDENTS_ROOT_FOLDER_ID = ""
+UNSORTED_FOLDER_ID = "1Ng1nlFfLo2H4d_hgs7UnQlHHL9uGm2j8"
+GROUP_PHOTOS_FOLDER_ID = ""  # You can fill this if you want a specific group photo folder
+STUDENTS_ROOT_FOLDER_ID = "11v90B92T7lVdl0ijhMbXayqkX04VUpAV"
 
 # ---- Local paths ----
 TEMP_DIR = "temp_processing"
