@@ -1,16 +1,10 @@
-import { drive } from "@/lib/drive";
+import { supabase } from "./supabase";
 
-/**
- * User Registry — Stored as a JSON file in Google Drive
- * 
- * This stores approved_users.json in the user's Google Drive (in
- * a hidden _config folder). This persists across Vercel serverless
- * invocations because it uses the Drive API, not the local filesystem.
- */
+function getAdminEmails(): string[] {
+    return process.env.ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
+}
 
-const CONFIG_FILE_NAME = "_bomis_approved_users.json";
-
-interface UserEntry {
+export interface UserEntry {
     email: string;
     name: string;
     image?: string;
@@ -19,91 +13,85 @@ interface UserEntry {
     approvedAt?: string;
 }
 
-// ---- Drive-backed storage ----
-
-async function findConfigFileId(): Promise<string | null> {
-    try {
-        const res = await drive.files.list({
-            q: `name = '${CONFIG_FILE_NAME}' and trashed = false`,
-            fields: "files(id)"
-        });
-        return res.data.files?.[0]?.id || null;
-    } catch (e) {
-        console.error("[UserStore] Failed to search for config file:", e);
-        return null;
-    }
-}
-
 export async function loadUsers(): Promise<UserEntry[]> {
-    try {
-        const fileId = await findConfigFileId();
-        if (!fileId) return [];
+    if (!supabase) return [];
 
-        const res = await drive.files.get(
-            { fileId, alt: "media" },
-            { responseType: "text" }
-        );
-        return JSON.parse(res.data as string);
+    try {
+        const { data, error } = await supabase
+            .from("users")
+            .select("email, name, image, approved, requested_at, approved_at");
+
+        if (error) throw error;
+
+        return (data || []).map(row => ({
+            email: row.email,
+            name: row.name,
+            image: row.image,
+            approved: row.approved,
+            requestedAt: row.requested_at,
+            approvedAt: row.approved_at
+        }));
     } catch (e) {
-        console.error("[UserStore] Failed to read users:", e);
+        console.error("[UserStore] Failed to load users from Supabase:", e);
         return [];
     }
 }
 
 export async function saveUsers(users: UserEntry[]): Promise<void> {
-    try {
-        const content = JSON.stringify(users, null, 2);
-        const fileId = await findConfigFileId();
-
-        if (fileId) {
-            // Update existing file
-            await drive.files.update({
-                fileId,
-                media: {
-                    mimeType: "application/json",
-                    body: content,
-                },
-            });
-        } else {
-            // Create new file
-            await drive.files.create({
-                requestBody: {
-                    name: CONFIG_FILE_NAME,
-                    mimeType: "application/json",
-                },
-                media: {
-                    mimeType: "application/json",
-                    body: content,
-                },
-            });
-        }
-    } catch (e) {
-        console.error("[UserStore] Failed to save users:", e);
-    }
+    // This function is no longer needed in the same way, as we'll update 
+    // individuals directly in Supabase rather than overwriting a whole file.
+    console.warn("[UserStore] saveUsers called, but Supabase uses direct row-level operations.");
 }
 
 export async function registerUser(email: string, name: string, image?: string): Promise<void> {
-    const users = await loadUsers();
-    const existing = users.find((u) => u.email === email);
-    if (!existing) {
-        users.push({
-            email,
-            name,
-            image,
-            approved: false,
-            requestedAt: new Date().toISOString(),
-        });
-        await saveUsers(users);
+    if (!supabase) return;
+
+    try {
+        // Since we have email as unique, we can attempt an insert and it will
+        // fail gracefully if it already exists (or we can upsert if we want to update names/images).
+        // Let's do a simple insert.
+        const { error } = await supabase
+            .from("users")
+            .insert([
+                {
+                    email,
+                    name,
+                    image,
+                    approved: getAdminEmails().includes(email), // Auto-approve admins
+                }
+            ]);
+
+        // Code 23505 is unique violation, which is fine (user already exists)
+        if (error && error.code !== "23505") {
+            console.error("[UserStore] Error registering user:", error);
+        }
+    } catch (e) {
+        console.error("[UserStore] Failed to register user:", e);
     }
 }
 
 export async function isUserApproved(email: string): Promise<boolean> {
-    // Admins are always approved
-    const adminEmails = process.env.ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
-    if (adminEmails.includes(email)) return true;
+    if (getAdminEmails().includes(email)) return true;
+    if (!supabase) return false;
 
-    // Check the Drive-stored approved users list
-    const users = await loadUsers();
-    const user = users.find((u) => u.email === email);
-    return user?.approved === true;
+    try {
+        const { data, error } = await supabase
+            .from("users")
+            .select("approved")
+            .eq("email", email)
+            .single();
+
+        if (error) {
+            // PGRST116 means zero rows found
+            if (error.code !== "PGRST116") {
+                console.error("[UserStore] Error checking approval:", error);
+            }
+            return false;
+        }
+
+        return data?.approved === true;
+    } catch (e) {
+        console.error("[UserStore] Failed checking approval:", e);
+        return false;
+    }
 }
