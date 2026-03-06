@@ -25,8 +25,7 @@ async function findConfigFileId(): Promise<string | null> {
     try {
         const res = await drive.files.list({
             q: `name = '${CONFIG_FILE_NAME}' and trashed = false`,
-            fields: "files(id)",
-            spaces: "drive",
+            fields: "files(id)"
         });
         return res.data.files?.[0]?.id || null;
     } catch (e) {
