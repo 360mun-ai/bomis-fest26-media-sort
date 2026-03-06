@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { driveAuth, UNSORTED_FOLDER_ID } from "@/lib/drive";
+import { getDriveAuth, UNSORTED_FOLDER_ID } from "@/lib/drive";
 
 export async function POST(req: NextRequest) {
     try {
@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
         }
 
         // Get the JWT access token from our service account
-        const { token } = await driveAuth.getAccessToken();
+        const auth = getDriveAuth();
+        const { token } = await auth.getAccessToken();
 
         if (!token) {
             return NextResponse.json({ error: "Failed to authenticate with Google Drive" }, { status: 500 });
