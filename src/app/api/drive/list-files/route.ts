@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { drive } from "@/lib/drive";
+import { getDriveClient } from "@/lib/drive";
 
 // GET: List files in a specific Google Drive folder
 export async function GET(req: NextRequest) {
@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "Missing folderId parameter" }, { status: 400 });
         }
 
+        const drive = getDriveClient();
         const response = await drive.files.list({
             q: `'${folderId}' in parents and trashed = false`,
             fields: "files(id, name, mimeType, thumbnailLink, webContentLink, createdTime)",

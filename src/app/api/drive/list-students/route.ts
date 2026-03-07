@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { drive } from "@/lib/drive";
+import { getDriveClient } from "@/lib/drive";
 
 // GET: List student folders (subfolders inside the Students root folder)
 export async function GET() {
@@ -18,6 +18,7 @@ export async function GET() {
             return NextResponse.json({ error: "Students folder ID not configured" }, { status: 500 });
         }
 
+        const drive = getDriveClient();
         const response = await drive.files.list({
             q: `'${studentsFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
             fields: "files(id, name)",

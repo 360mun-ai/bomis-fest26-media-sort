@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { drive } from "@/lib/drive";
+import { getDriveClient } from "@/lib/drive";
 
 // POST: Tag an unknown face by moving the file to a student's folder
 export async function POST(req: NextRequest) {
@@ -26,6 +26,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Check if a folder for this student already exists
+        const drive = getDriveClient();
         const existingFolders = await drive.files.list({
             q: `'${studentsFolderId}' in parents and name = '${studentName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
             fields: "files(id, name)",

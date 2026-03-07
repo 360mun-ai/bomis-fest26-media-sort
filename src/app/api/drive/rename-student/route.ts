@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { drive } from "@/lib/drive";
+import { getDriveClient } from "@/lib/drive";
 
 /**
  * Rename Student API
@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
         }
 
         // 1. Rename the Google Drive folder (always works — uses Drive API)
+        const drive = getDriveClient();
         await drive.files.update({
             fileId: entry.drive_folder_id,
             requestBody: { name: cleanName },
