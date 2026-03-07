@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         // Request a Resumable Upload Session URL from Google Drive
         // https://developers.google.com/drive/api/guides/manage-uploads#resumable
         const origin = req.headers.get("origin") || process.env.NEXTAUTH_URL || "http://localhost:3000";
-        const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable", {
+        const response = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&supportsAllDrives=true", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,
