@@ -37,10 +37,28 @@ export async function loadUsers(): Promise<UserEntry[]> {
     }
 }
 
-export async function saveUsers(users: UserEntry[]): Promise<void> {
-    // This function is no longer needed in the same way, as we'll update 
-    // individuals directly in Supabase rather than overwriting a whole file.
-    console.warn("[UserStore] saveUsers called, but Supabase uses direct row-level operations.");
+export async function setUserApproval(email: string, approved: boolean): Promise<boolean> {
+    if (!supabase) return false;
+
+    try {
+        const { error } = await supabase
+            .from("users")
+            .update({
+                approved,
+                approved_at: approved ? new Date().toISOString() : null,
+            })
+            .eq("email", email);
+
+        if (error) {
+            console.error("[UserStore] Error updating user approval:", error);
+            return false;
+        }
+
+        return true;
+    } catch (e) {
+        console.error("[UserStore] Failed to update user approval:", e);
+        return false;
+    }
 }
 
 export async function registerUser(email: string, name: string, image?: string): Promise<void> {

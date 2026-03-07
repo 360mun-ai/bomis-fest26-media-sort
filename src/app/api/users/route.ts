@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { loadUsers, saveUsers } from "@/lib/user-store";
+import { loadUsers, setUserApproval } from "@/lib/user-store";
 
 /**
  * User Management API
@@ -54,22 +54,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: "Missing email or invalid action" }, { status: 400 });
         }
 
-        const users = await loadUsers();
-        const userIndex = users.findIndex((u) => u.email === email);
+        const success = await setUserApproval(email, action === "approve");
 
-        if (userIndex === -1) {
-            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        if (!success) {
+            return NextResponse.json({ error: "Failed to update user approval" }, { status: 500 });
         }
-
-        if (action === "approve") {
-            users[userIndex].approved = true;
-            users[userIndex].approvedAt = new Date().toISOString();
-        } else {
-            users[userIndex].approved = false;
-            users[userIndex].approvedAt = undefined;
-        }
-
-        await saveUsers(users);
 
         return NextResponse.json({
             status: action === "approve" ? "approved" : "revoked",
